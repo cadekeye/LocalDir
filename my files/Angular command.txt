@@ -1,0 +1,26 @@
+
+CREATING ANGULAR PROJECT USING THE ANGULAR CLI
+
+1. npm install -g @angular/cli
+This will install angular cli on the machine
+
+TO CREATE NEW ANGULAR PROJECT
+2. ng new <project-name>
+This will create all neccessary initial files and directory
+
+3. cd <project-name>
+4. ng serve
+   This will run the project.
+
+
+ADD THE PROJECT TO GIT REMOTE
+1. git init
+2. git add .
+3. git commit -m "<commit-desc>"
+4. git remote add origin <remote-address>
+5. git push -u origin <branch-name>
+
+
+CREATING COMPONENT
+1. ng g component <component-name>
+
