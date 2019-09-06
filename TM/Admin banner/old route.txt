@@ -1,0 +1,7 @@
+https://localhost/mktsel/Common/Admin/AdminBanners.asp?product_id=0
+
+
+
+
+            new EditableGridComponent.FormComponent.TextPropertyViewModel({ propertyKey: 'imageWidth', caption: 'Image width', isDisabled: true, validationRules: {digits: true}}),
+            new EditableGridComponent.FormComponent.TextPropertyViewModel({ propertyKey: 'imageHeight', caption: 'Image height', isDisabled: true, validationRules: {digits: true} }),

@@ -1,0 +1,76 @@
+@using MarketsSelect.Web.Shared.Mvc.ViewModels.BannerClients
+@using MarketsSelect.Web.Shared.Mvc.Utils
+
+@model BannerClientCombineViewModel
+
+@{
+    Layout = "~/CustomViews/Layouts/Es6Layout.cshtml";
+    @Link.JsBundle("~/bundles/shared/banner-client.bundle.js")
+    @Link.CssBundle("~/bundles/shared/banner-client.bundle.css")
+}
+
+@Html.Partial("../Shared/Components/EditableGrid/EditableGridComponent")
+
+@Html.AddDataForJs(new {
+    bannerClients = Model.BannerClientViewModel,
+    apiUrl = Url.HttpRouteUrl("API Default", new { Controller = "BannerClient" }),
+    viewBannersUrl = Url.Action("ViewBanners", "BannerClient"),
+    globalSettingUrl = Url.HttpRouteUrl("API Default", new { Controller = "GlobalSetting" }),
+    globalSetting = Model.GlobalSettingViewModel
+})
+
+<h4 class="page-title">Banner clients</h4>
+<h4 class="subheading">Edit the Banner clients list ...</h4>
+
+<script id="custom-actions-cell-template" type="text/html">
+    <a href="#" title="View associated Banners" class="view-banners img-button" data-bind="attr: { href: $parents[2].makeViewBannersUrl(item) }"></a>
+    <a href="#" title="Edit" class="edit img-button" data-bind="click: $parents[1].editItem"></a>
+    <a href="#" title="Remove" class="remove img-button" data-bind="click: $parents[1].removeItem"></a>
+</script>
+
+<div data-bind="component: {
+    name: 'editable-grid-component',
+    params: {
+        entityCaption: 'Banner Client',
+        propertyDefinitions: propertyDefinitions,
+        columnDefinitions: columnDefinitions,
+        items: items,
+        selectedItem: selectedItem,
+        stringifyItem: stringifyItem,
+        onAdd: onAdd,
+        onEdit: onEdit,
+        onRemove: onRemove,
+        sortInfo: sortInfo,
+        isInEditMode: isInEditMode
+    }
+}">
+</div>
+
+<h4 class="subheading with-bottom-line">Edit global banner settings ...</h4>
+<p>Maximum allowed image size for banner</p>
+<div data-bind="with: globalSettingViewModel">
+    <div data-bind="component: {
+                name: 'form-component',
+                params: {
+                    propertyDefinitions: propertyDefinitions,
+                    item: item,
+                    onSave: onSave,
+                    hideCancelButton: true,
+                    reloadAfterSave: true
+                }
+            }">
+    </div>
+</div>
+
+@Html.ActionLink("Show banners","Index","SupportBank")
+
+
+<div class="link-top">
+    <a data-bind="visible: !isInEditMode()" href="~/Common/Admin/AdminBanners.asp">Back to Banners</a>
+</div>
+
+<div class="link-top">
+    <a data-bind="visible: !isInEditMode()" href="~/admin/products/admin.aspx">Back to Products</a>
+</div>
+
+

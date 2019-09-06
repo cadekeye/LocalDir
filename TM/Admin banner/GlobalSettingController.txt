@@ -1,0 +1,48 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.Http;
+using MarketsSelect.DomainModel;
+using MarketsSelect.DomainModel.Repositories;
+using MarketsSelect.DomainModel.Services;
+using MarketsSelect.Web.Shared.Mvc.Filters;
+using MarketsSelect.Web.Shared.Mvc.Services.Authorization;
+using MarketsSelect.Web.Shared.Mvc.ViewModels;
+using MarketsSelect.Web.Shared.Mvc.ViewModels.BannerClients;
+using ThomasMurray.AutoTxFacility.Attributes;
+using ThomasMurray.Common.Jetbrains;
+
+namespace MarketsSelect.Web.Shared.Mvc.Controllers.BannerClients.WebApi {
+   public class GlobalSettingController: ApiController {
+       private readonly IEventService eventService;
+       private readonly IMarketsSelectRepository<BannerSetting> bannerSettingRepository;
+
+       public GlobalSettingController([NotNull] IMarketsSelectRepository<BannerSetting> bannerSettingRepository, [NotNull] IEventService eventService) {
+           this.bannerSettingRepository = bannerSettingRepository ?? throw new ArgumentNullException(nameof(bannerSettingRepository));
+           this.eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
+       }
+
+       [Transaction]
+       [WebApiAuthorizationFilter(typeof(ProductAdminPermissionChecker))]
+       public virtual void Post(GlobalSettingViewModel globalSettingViewModel) {
+           var bannerSetting = bannerSettingRepository.FindAll().FirstOrDefault();
+
+           if (bannerSetting == null) {
+               bannerSetting = new BannerSetting {
+                   MaxImageHeight = globalSettingViewModel.Height, MaxImageWidth = globalSettingViewModel.Width, Layout = globalSettingViewModel.Layout
+               };
+               bannerSettingRepository.Add(bannerSetting);
+            } else {
+               bannerSetting.MaxImageHeight = globalSettingViewModel.Height;
+               bannerSetting.MaxImageWidth = globalSettingViewModel.Width;
+               bannerSetting.Layout = globalSettingViewModel.Layout;
+           }
+
+
+            eventService.Trace(EventType.BannerSettingUpdated,
+                              $"Id = {bannerSetting.Id}, MaxImageHeight = '{bannerSetting.MaxImageHeight}', MaxImageWidth = {bannerSetting.MaxImageWidth}, Layout = {bannerSetting.Layout}");
+       }
+   }
+}

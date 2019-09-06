@@ -1,0 +1,4 @@
+1)  Try to run
+ nuget restore; msbuild site.sln
+from
+repositories\ms\sites\mktsel.v3

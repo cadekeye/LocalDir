@@ -1,0 +1,46 @@
+using System.Collections.Generic;
+using MarketsSelect.DomainModel;
+using MarketsSelect.DomainModel.Services;
+using MarketsSelect.DomainModel.Tests;
+using MarketsSelect.DomainModel.Tests.EntityUtil;
+using NUnit.Framework;
+using Rhino.Mocks;
+using ThomasMurray.Common.Tests.Util;
+
+namespace MarketsSelect.Web.Shared.Mvc.Tests.Services.Banners {
+    [TestFixture]
+    public class TestBannerService {
+        private static readonly IEqualityComparer<Banner> bannerComparer = new StructuralEqualityComparer<Banner> {
+            f => f.FileName,
+            f => f.ImageWidth,
+            f => f.ImageHeight,
+            f => f.Attachment,
+            f => f.FileSize,
+            f => f.UploadedAt
+        };
+        private ISettingsProvider settingsProvider;
+        private IBannerService bannerService;
+
+        [SetUp]
+        public void Init() {
+            settingsProvider = MockRepository.GenerateStub<ISettingsProvider>();
+
+            settingsProvider.Stub(x => x.BannerMaxImageWidth).Return(150);
+            settingsProvider.Stub(x => x.BannerMaxImageHeight).Return(150);
+            bannerService = new BannerService(settingsProvider);
+        }
+
+        [Test]
+        public void TrySetContent() {
+            var byteArray = ImageHelper.GetEmptyImageBytes(100, 100);
+
+            var actualBanner = BannerUtil.MakeAValidBanner();
+            bannerService.TrySetContent(actualBanner, byteArray, "Test");
+
+            var expectedBanner = new Banner { ImageHeight = 100, ImageWidth = 100, FileName = "Test" };
+            expectedBanner.SetContent(byteArray);
+
+            Assert.That(expectedBanner, Is.EqualTo(actualBanner).Using(bannerComparer));
+        }
+    }
+}

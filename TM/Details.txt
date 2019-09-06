@@ -1,0 +1,82 @@
+Skype Account:
+email: cadekeye.tm@thomasmurray.co.uk
+pass: Kaykay73
+
+
+Agilefant
+http://agilefant.thomasmurray.com
+Login: cadekeye
+Pass: Kaykay73
+
+
+Mecurial
+http://hg.thomasmurray.com
+Login: cadekeye
+Pass: Kaykay73
+
+ReviewBoard
+http://reviews.thomasmurray.com
+Login: cadekeye
+Pass: Kaykay73
+
+
+
+
+To build webpack use:
+ .\webpack-development-build.cmd
+
+To watch changes to webpack use:
+.\webpack-development-watch.cmd
+
+
+
+
+TotroiseHq Work bench commands:
+hg postreview -o      (Original first post)
+hg postreview -o -e <previous-review-Id> <ToitoiseHq-Rev-no>   (Subsequent post)
+
+
+TO PULL FROM SOURCE CONTROL USE:
+hg pull --rebase
+
+MAKING & COMBINE PATCHES:
+1) import to MQ   ----- on current
+2) unapply patch  ----- on current
+
+3) import to MQ  ------ on the parent to marge to
+4) fold patch    ------ on the current patch created
+
+5) finish patch  ------ on the combine patch created
+
+TO COMBINE 2 COMMIT WITH DIFF HEAD:
+Revision 87678: make as patch and unnaply it.
+Revision 87677: strip it.
+Revision 87607: strip it.
+Revision 87606: make as patch and unnaply it.
+
+
+Screen TO GIF:
+https://www.screentogif.com/
+
+
+JetBrain:
+Account: cadekeye@thomasmurray.com
+Pass: Kaykay73#
+
+DbUpdater:
+
+C:\Users\cadekeye\source\repo\common\dbupdater> nuget restore
+ C:\Users\cadekeye\source\repo\common\dbupdater> msbuild msbuild.project /t:Compile
+ C:\Users\cadekeye\source\repo\common\dbupdater> .\dbupdater\bin\Release\dbupdater.exe . marketsselect
+
+
+ an account at http://tiki.thomasmurray.com:
+
+UserId: cadekeye 
+Pass: ca4433_
+
+
+
+Get-ChildItem '*v3\Includes\AppSessionVars-inc.asp' | ForEach-Object { (Get-Content $_) | Where-Object { $_ -notmatch 'dot_net_banners_clients_enabled' } | Set-Content $_ }
+
+npm install

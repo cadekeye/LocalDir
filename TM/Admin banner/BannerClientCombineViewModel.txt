@@ -1,0 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MarketsSelect.Web.Shared.Mvc.ViewModels.BannerClients {
+   public class BannerClientCombineViewModel {
+       public BannerClientCombineViewModel(BannerClientViewModel[] bannerClientViewModel, GlobalSettingViewModel globalSettingViewModel) {
+           BannerClientViewModel = bannerClientViewModel;
+           GlobalSettingViewModel = globalSettingViewModel;
+       }
+       public BannerClientViewModel[] BannerClientViewModel { get; }
+       public GlobalSettingViewModel GlobalSettingViewModel { get; }
+    }
+}

@@ -1,0 +1,40 @@
+@{
+    var bannersNotShowingOnSupport = Model.BannerNotShowingOnSupport
+                       .Select(x => new SupportBannerController.BannerParameter { Id = x.BannerId, NewChecked = false, OldChecked = false, FileName = x.FileName, ImageHeight = x.ImageHeight, ImageWidth = x.ImageWidth, Title = x.Title })
+                       .ToArray();
+
+    var bannersShowingOnSupport = Model.BannerShowingOnSupport
+                                          .Select(x => new SupportBannerController.BannerParameter { Id = x.BannerId, NewChecked = true, OldChecked = true, FileName = x.FileName, ImageHeight = x.ImageHeight, ImageWidth = x.ImageWidth, Title = x.Title })
+                                          .ToArray();
+
+}
+
+
+
+
+
+        public class SaveParameters {
+            public BannerParameter[] Banners { get; set; }
+        }
+
+        public class BannerParameter {
+            public int Id { get; set; }
+            public string FileName { get; set; }
+            public string Title { get; set; }
+            public int ImageWidth { get; set; }
+            public int ImageHeight { get; set; }
+            public bool OldChecked { get; set; }
+            public bool NewChecked { get; set; }
+        }
+
+
+
+$(function () {
+    const options = {
+        success: function(){
+            alert('done');
+        }
+    };
+
+    $('#support-form').ajaxForm(options);
+});

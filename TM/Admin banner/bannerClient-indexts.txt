@@ -1,0 +1,125 @@
+import * as $ from 'jquery';
+import * as ko from 'knockout';
+import '../../infrastructure/ajax-csrf-prefilter';
+import * as EditableGridComponent from '../../infrastructure/components/editable-grid/editable-grid-component';
+import { buildUrl, areEqualIgnoringCase, escapeHtml } from '../../infrastructure/utils/misc';
+
+import './index.scss';
+
+const layouts: Array<ISimpleEntityViewModel> = [{id: 1, name: 'left'},{id: 2, name: 'centre'},{id: 3, name: 'right'}];
+
+interface IGlobalSettingFormItem {
+    height: number;
+    width: number;
+    layout: ISimpleEntityViewModel;
+}
+
+interface IBannerClient {
+    id: number;
+    clientOrganisationName: string;
+    displayOrder: number;
+}
+
+class GlobalSettingViewModel {
+    public propertyDefinitions: EditableGridComponent.FormComponent.IPropertyViewModel[];
+    public item: IGlobalSettingFormItem | undefined;
+    private apiUrl: string;
+
+    constructor(layouts: ISimpleEntityViewModel[], apiUrl: string, globalSetting: IGlobalSettingFormItem) {
+        this.item = undefined;
+        this.apiUrl = apiUrl;
+
+        this.propertyDefinitions = [
+            new EditableGridComponent.FormComponent.TextPropertyViewModel({ propertyKey: 'height', caption: 'MAX allowed banner height', validationRules: { required: true, min: -2147483648, max: 2147483647 }, defaultValue: globalSetting.height.toString() }),
+            new EditableGridComponent.FormComponent.TextPropertyViewModel({ propertyKey: 'width', caption: 'MAX allowed banner width', validationRules: { required: true }, defaultValue: globalSetting.width.toString() }),
+            new EditableGridComponent.FormComponent.SelectPropertyViewModel({ propertyKey: 'layout', caption: 'layout of banners on page', validationRules: { required: true }}, layouts, globalSetting.layout.name)
+        ];
+    }
+
+    public onSave = (item: IGlobalSettingFormItem) => {
+        return $.ajax({
+            url: this.apiUrl,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                height: item.height,
+                width: item.width,
+                layout: item.layout.name
+            })
+        });
+    };
+}
+
+class BannerClientViewModel {
+    public readonly columnDefinitions: EditableGridComponent.GridComponent.ColumnDefinition[];
+    public readonly propertyDefinitions: EditableGridComponent.FormComponent.IPropertyViewModel[];
+    private readonly selectedItem: KnockoutObservable<IBannerClient | undefined>;
+    private readonly items: KnockoutObservableArray<IBannerClient>;
+    private readonly apiUrl: string;
+    private readonly viewBannersUrl: string;
+    private readonly globalSettingUrl: string;
+    public sortInfo: EditableGridComponent.GridComponent.SortInfo;
+    public globalSettingViewModel: GlobalSettingViewModel;
+
+    public isInEditMode: KnockoutObservable<boolean>;
+
+    constructor(bannerClients: IBannerClient[], apiUrl: string, viewBannersUrl: string, globalSettingUrl: string, globalSetting: IGlobalSettingFormItem) {
+        this.selectedItem = ko.observable();
+        this.globalSettingUrl = globalSettingUrl;
+        this.globalSettingViewModel = new GlobalSettingViewModel(layouts , this.globalSettingUrl, globalSetting);
+
+        this.columnDefinitions = [
+            new EditableGridComponent.GridComponent.ColumnDefinition({ propertyKey: 'clientOrganisationName', caption: 'Name', sortable: true }),
+            new EditableGridComponent.GridComponent.ColumnDefinition({ propertyKey: 'displayOrder', caption: 'Display Order', sortable: true }),
+            new EditableGridComponent.GridComponent.ColumnDefinition({ propertyKey: 'actions', caption: 'Actions', cellTemplateName: 'custom-actions-cell-template', cellClasses: 'actions' })
+
+        ];
+
+        this.propertyDefinitions = [
+            new EditableGridComponent.FormComponent.TextPropertyViewModel({ propertyKey: 'clientOrganisationName', caption: 'Name', validationRules: { required: true, isUnique: true, maxlength: 255 } }),
+            new EditableGridComponent.FormComponent.TextPropertyViewModel({ propertyKey: 'displayOrder', caption: 'Display Order', validationRules: { min: 0, required: true, digits: true }, defaultValue: '0' })
+        ];
+
+        this.items = ko.observableArray(bannerClients);
+
+        this.apiUrl = apiUrl;
+
+        this.viewBannersUrl = viewBannersUrl;
+
+        this.isInEditMode = ko.observable(false);
+
+        this.sortInfo = new EditableGridComponent.GridComponent.SortInfo('clientOrganisationName', true);
+
+        $.validator.addMethod('isUnique', name => {
+            $.validator.messages.isUnique = `Banner Client with such name "${escapeHtml(name)}" exists already.`;
+            return ko.utils.arrayFirst(this.items(), item => this.selectedItem() !== item && areEqualIgnoringCase(item.clientOrganisationName.trim(), name)) === null;
+        });
+    }
+
+    public stringifyItem = (item: IBannerClient) => item.clientOrganisationName;
+
+    public makeViewBannersUrl = (item: IBannerClient) => {
+        return buildUrl(this.viewBannersUrl, { bannerClientId: item.id });
+    };
+
+    public onAdd = (item: IBannerClient) => $.ajax({
+        url: this.apiUrl,
+        data: JSON.stringify(item),
+        type: 'POST',
+        contentType: 'application/json'
+    });
+
+    public onRemove = (item: IBannerClient) => $.ajax({
+        url: buildUrl(this.apiUrl, { id: item.id }),
+        type: 'DELETE'
+    });
+
+    public onEdit = (item: IBannerClient) => $.ajax({
+        url: this.apiUrl,
+        data: JSON.stringify(item),
+        type: 'PUT',
+        contentType: 'application/json'
+    });
+}
+
+ko.applyBindings(new BannerClientViewModel(window.siteData.bannerClients, window.siteData.apiUrl, window.siteData.viewBannersUrl, window.siteData.globalSettingUrl, window.siteData.globalSetting));

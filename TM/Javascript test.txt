@@ -1,0 +1,34 @@
+function ensure(value) {
+ if(value === undefined){
+   throw new Error('no argument');
+ }
+  
+  return value;
+}
+
+
+
+function removeProperty(obj, prop) {
+  if(obj.hasOwnProperty(prop)){
+    delete obj[prop];
+    return true;
+  }
+  return false;
+}
+
+
+
+function createCheckDigit(membershipId) {
+  let sumMembershipId = aggregator(membershipId);
+  while (parseInt(sumMembershipId) > 9) sumMembershipId = aggregator(sumMembershipId);
+  return sumMembershipId;
+}
+
+function aggregator(strMembershipId) {
+  return strMembershipId.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+}
+
+
+
+
+

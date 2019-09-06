@@ -1,0 +1,44 @@
+IHttpActionResult
+
+      enctype="multipart/form-data"
+
+
+
+On a day off
+
+
+Migrating AdminSupportBank.asp posting to use API
+Faced with CSRF issue at the moment
+
+
+
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36
+
+
+
+
+
+       [MvcAuthorizationFilter(typeof(ProductAdminPermissionChecker))]
+        [HttpPost]
+        [Transaction]
+        public virtual ActionResult Index(int[] checkedBanners) {
+            var bankBanners = bannerRepository.FindAll();
+
+            if (checkedBanners != null) {
+                if (bankBanners.Any(a => checkedBanners.Contains(a.Id) && !a.ShowOnSupportBanksPage)) {
+                    bannerRepository.DoInBatches(bankBanners.Where(a => checkedBanners.Contains(a.Id) && !a.ShowOnSupportBanksPage), UpdateSettings, 250);
+                }
+
+                if (bankBanners.Any(a => !checkedBanners.Contains(a.Id) && a.ShowOnSupportBanksPage)) {
+                    bannerRepository.DoInBatches(bankBanners.Where(a => !checkedBanners.Contains(a.Id) && a.ShowOnSupportBanksPage), UpdateSettings, 250);
+                }
+            }
+
+            return View(GetCombineBankBannersViewModel(bankBanners));
+        }
+
+
+
+      private static void UpdateSettings(Banner bankBanner) {
+            bankBanner.ShowOnSupportBanksPage = !bankBanner.ShowOnSupportBanksPage;
+        }

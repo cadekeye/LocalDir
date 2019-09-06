@@ -1,0 +1,61 @@
+static string ConvertToRomanUsingDict(int number)
+        {
+            // Validate
+            if (number < 0 || number > 3999)
+                throw new ArgumentException("Value must be in the range 0 - 3,999.");
+
+            if (number == 0) return "N";
+
+            Dictionary<string,int> dictValues = new Dictionary<string, int>();
+            dictValues.Add("M",1000);
+            dictValues.Add("XM", 990);
+            dictValues.Add("CM", 900);
+            dictValues.Add("D", 500);
+            dictValues.Add("XD", 490);
+            dictValues.Add("CD", 400);
+            dictValues.Add("C", 100);
+            dictValues.Add("XC", 90);
+            dictValues.Add("L", 50);
+            dictValues.Add("XL", 40);
+            dictValues.Add("X", 10);
+            dictValues.Add("IX", 9);
+            dictValues.Add("V", 5);
+            dictValues.Add("IV", 4);
+            dictValues.Add("I", 1);
+
+            StringBuilder result = new StringBuilder();
+
+            while (number > 0) {
+               var tupleResult = GetNext(dictValues, number);
+
+                int r = Math.Max(1, number / tupleResult.Item2);
+
+                if (r > 1)
+                {
+                    for (int i = 0; i < r; i++)
+                    {
+                        result.Append(tupleResult.Item1);
+                    }
+
+                    number = number - (tupleResult.Item2 * r);
+                }
+                else
+                {
+                    result.Append(tupleResult.Item1);
+                    number = number - tupleResult.Item2;
+                }
+
+                //result.Append(tupleResult.Item1);
+                // number = number - tupleResult.Item2;
+
+            }
+
+            return result.ToString();
+        }
+
+  private static Tuple<string, int> GetNext(Dictionary<string,int> input, int number) {
+            int value = input.Where(x => x.Value <= number).Take(1).First().Value;
+            var key = input.Where(x => x.Value <= number).Take(1).First().Key;
+
+            return Tuple.Create(key, value);
+        }

@@ -1,0 +1,55 @@
+using System;
+using System.Linq;
+using System.Web.Mvc;
+using MarketsSelect.DomainModel;
+using MarketsSelect.DomainModel.Repositories;
+using MarketsSelect.Web.Common.ViewModels;
+using MarketsSelect.Web.Shared.Mvc.Filters;
+using MarketsSelect.Web.Shared.Mvc.Services.Authorization;
+using MarketsSelect.Web.Shared.Mvc.ViewModels;
+using MarketsSelect.Web.Shared.Mvc.ViewModels.BannerClients;
+using MarketsSelect.Web.Shared.Mvc.ViewModels.SupportBank;
+using ThomasMurray.AutoTxFacility.Attributes;
+using ThomasMurray.Common.Jetbrains;
+
+namespace MarketsSelect.Web.Shared.Mvc.Controllers.BannerClients {
+    public class BannerClientController : Controller {
+        private readonly IMarketsSelectRepository<BannerClient> bannerClientRepository;
+        private readonly IMarketsSelectRepository<BannerSetting> bannerSettingRepository;
+
+        public BannerClientController([NotNull] IMarketsSelectRepository<BannerClient> bannerClientRepository, [NotNull] IMarketsSelectRepository<BannerSetting> bannerSettingRepository) {
+            this.bannerClientRepository = bannerClientRepository ?? throw new ArgumentNullException(nameof(bannerClientRepository));
+            this.bannerSettingRepository = bannerSettingRepository ?? throw new ArgumentNullException(nameof(bannerSettingRepository));
+        }
+
+        [ReadOnlyTransaction]
+        [MvcAuthorizationFilter(typeof(ProductAdminPermissionChecker))]
+        public virtual ActionResult Index() {
+            var bannerGlobalSetting = bannerSettingRepository.FindAll()
+                                                       .Select(x => new GlobalSettingViewModel(x.MaxImageHeight, x.MaxImageWidth, x.Layout))
+                                                       .FirstOrDefault();
+
+            var bannerClients = bannerClientRepository.FindAll()
+                                                      .OrderBy(x => x.ClientOrganisationName)
+                                                      .Select(x => new BannerClientViewModel(x.Id, x.ClientOrganisationName, x.DisplayOrder))
+                                                      .ToArray();
+
+            return View(new BannerClientCombineViewModel(bannerClients, bannerGlobalSetting));
+        }
+
+        [ReadOnlyTransaction]
+        [MvcAuthorizationFilter(typeof(ProductAdminPermissionChecker))]
+        public virtual ActionResult ViewBanners(int bannerClientId) {
+            var bannerClients = bannerClientRepository.FindAll().Select(x => new SimpleEntityViewModel {Id = x.Id, Name = x.ClientOrganisationName}).ToArray();
+
+            var bannerClient = bannerClientRepository.GetWithFilters(bannerClientId);
+
+            var banners = bannerClient
+                          .Banners.Select(x => new BannerViewModel(x.Id, x.ImageWidth, x.ImageHeight, x.Title, x.FileName, x.FileSize, x.UploadedAt.ToShortDateString(),
+                                                                   x.DisplayCount, x.ClickCount, x.Url, x.Hint, new SimpleEntityViewModel{ Id = x.Client.Id, Name = x.Client.ClientOrganisationName}, x.ShowOnSupportBanksPage,
+                                                                   x.ShowOnBrowsePage, x.ShowOnReports)).ToArray();
+
+            return View(new BannerClientBannersViewModel(bannerClient.ClientOrganisationName, bannerClientId, banners, bannerClients));
+        }
+    }
+}
